@@ -1,0 +1,14 @@
+{
+  "tests": [
+    {
+      "name": "Django Classroom Tests",
+      "setup": "pip install -r requirements.txt",
+      "run": "python library/manage.py test",
+      "input": "",
+      "output": "",
+      "comparison": "included",
+      "timeout": 10,
+      "points": 100
+    }
+  ]
+}

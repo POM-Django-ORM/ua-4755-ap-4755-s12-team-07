@@ -1,20 +1,42 @@
 from django.db import models
 
+
 class Author(models.Model):
+    """
+        This class represents an Author. \n
+        Attributes:
+        -----------
+        param name: Describes name of the author
+        type name: str max_length=20
+        param surname: Describes last name of the author
+        type surname: str max_length=20
+        param patronymic: Describes middle name of the author
+        type patronymic: str max_length=20
+    """
     name = models.CharField(max_length=20, blank=False)
     surname = models.CharField(max_length=20, blank=False)
     patronymic = models.CharField(max_length=20, blank=False)
 
     def __str__(self):
-        # Рядок без фігурних дужок на початку та в кінці під шаблон тесту
+        """
+        Magic method is redefined to show all information about Author.
+        :return: author id, author name, author surname, author patronymic
+        """
         return f"'id': {self.id}, 'name': '{self.name}', 'surname': '{self.surname}', 'patronymic': '{self.patronymic}'"
 
     def __repr__(self):
-        # Тест очікує коротку форму класу
+        """
+        This magic method is redefined to show class and id of Author object.
+        :return: class, id
+        """
         return f"Author(id={self.id})"
 
     @staticmethod
     def get_by_id(author_id):
+        """
+        :param author_id: SERIAL: the id of an Author to be found in the DB
+        :return: author object or None if an author with such ID does not exist
+        """
         try:
             return Author.objects.get(pk=author_id)
         except Author.DoesNotExist:
@@ -22,6 +44,11 @@ class Author(models.Model):
 
     @staticmethod
     def delete_by_id(author_id):
+        """
+        :param author_id: an id of an author to be deleted
+        :type author_id: int
+        :return: True if object existed in the db and was removed or False if it didn't exist
+        """
         try:
             author = Author.objects.get(pk=author_id)
             author.delete()
@@ -31,8 +58,21 @@ class Author(models.Model):
 
     @staticmethod
     def create(name, surname, patronymic):
+        """
+        :param name: name of the author
+        :type name: str max_length=20
+        :param surname: surname of the author
+        :type surname: str max_length=20
+        :param patronymic: patronymic of the author
+        :type patronymic: str max_length=20
+        :return: a new author object which is also written into the DB
+        """
         try:
-            if not name or len(name) > 20 or not surname or len(surname) > 20 or not patronymic or len(patronymic) > 20:
+            if not name or len(name) > 20:
+                return None
+            if not surname or len(surname) > 20:
+                return None
+            if not patronymic or len(patronymic) > 20:
                 return None
             author = Author(name=name, surname=surname, patronymic=patronymic)
             author.save()
@@ -40,22 +80,52 @@ class Author(models.Model):
         except Exception:
             return None
 
+    def to_dict(self):
+        """
+        :return: author id, author name, author surname, author patronymic
+        :Example:
+        | {
+        |   'id': 8,
+        |   'name': 'fn',
+        |   'surname': 'mn',
+        |   'patronymic': 'ln',
+        | }
+        """
+        return {
+            'id': self.id,
+            'name': self.name,
+            'surname': self.surname,
+            'patronymic': self.patronymic,
+        }
+
     def update(self, name=None, surname=None, patronymic=None):
-        # Перевірка валідності довжини імені (максимум 20 символів за ТЗ CharField)
+        """
+        Updates author in the database with the specified parameters.
+        :param name: name of the author
+        :type name: str max_length=20
+        :param surname: surname of the author
+        :type surname: str max_length=20
+        :param patronymic: patronymic of the author
+        :type patronymic: str max_length=20
+        :return: None
+        """
         if name is not None:
-            if len(name) > 20 or len(name) == 0:
-                return  # Скасовуємо оновлення, якщо ім'я невалідне
+            if len(name) == 0 or len(name) > 20:
+                return
             self.name = name
         if surname is not None:
-            if len(surname) > 20 or len(surname) == 0:
+            if len(surname) == 0 or len(surname) > 20:
                 return
             self.surname = surname
         if patronymic is not None:
-            if len(patronymic) > 20 or len(patronymic) == 0:
+            if len(patronymic) == 0 or len(patronymic) > 20:
                 return
             self.patronymic = patronymic
         self.save()
 
     @staticmethod
     def get_all():
+        """
+        returns data for json request with QuerySet of all authors
+        """
         return list(Author.objects.all())
